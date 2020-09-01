@@ -17,10 +17,11 @@ ActiveRecord::Schema.define(version: 2020_09_01_062150) do
 
   create_table "shows", force: :cascade do |t|
     t.string "title"
-    t.date "date_from"
-    t.date "date_to"
+    t.daterange "period"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["period"], name: "index_shows_on_period", using: :gist
+    t.index ["title"], name: "index_shows_on_title"
   end
 
 end

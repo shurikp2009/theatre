@@ -8,19 +8,39 @@ RSpec.describe Show, type: :model do
   end
 
   def create_show(date_from, date_to)
-    Show.create(title: title, date_from: date(date_from), date_to: date(date_to))
+    Show.create(title: title, period: date(date_from) .. date(date_to))
   end
 
-  it "should allow to create new show" do
+  it "should allow to create new show with valid attributes" do
     expect(Show.count).to be(0)
     show = create_show(10, 20)
 
-    expect(show).to be_present
+    expect(show).to be_valid
     expect(show.title).to eq(title)
     expect(Show.count).to be(1)
 
-    expect(show.date_from).to eq(Date.new(2020, 9, 10))
-    expect(show.date_to).to eq(Date.new(2020, 9, 20))
+    expect(show.period).to eq(Date.new(2020, 9, 10) .. Date.new(2020, 9, 20))    
+  end
+
+  it "should not allow to create a show with empty title" do
+    show = Show.create(title: '', period: (date(1) .. date(5)))
+    expect(show).not_to be_valid
+    expect(show.errors[:title]).to be_present
+  end
+  
+  invalid_periods = [
+    nil,
+    (Date.new(2020, 9, 12) .. Date.new(2020, 9, 10)),
+    34,
+    (10 .. 12)
+  ]
+
+  invalid_periods.each do |period|
+    it "should not allow to create a show with invalid period (#{period})" do
+      show = Show.create(title: 'correct', period: period)      
+      expect(show).not_to be_valid
+      expect(show.errors[:period]).to be_present
+    end
   end
   
   conflicting_intervals = [ # with (10 .. 20)
